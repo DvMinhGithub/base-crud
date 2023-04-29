@@ -31,10 +31,9 @@ class UserController {
   // Create a new user
   public async create(req: Request, res: Response): Promise<void> {
     try {
-      console.log(req.body);
       const user: IUser = new UserModel(req.body);
       const result: IUser = await user.save();
-      res.status(201).json({ body: req.body, result });
+      res.status(201).json({ body: req.body, data: result });
     } catch (error) {
       console.error((error as Error).message);
       res.status(500).send("Internal server error");
@@ -51,7 +50,8 @@ class UserController {
       }
       const updatedUser: IUser = Object.assign(user, req.body);
       const result: IUser = await updatedUser.save();
-      res.status(200).json({ success: true, result });
+
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
       console.error(error);
       res.status(500).send("Internal server error");
@@ -67,7 +67,9 @@ class UserController {
       if (!result) {
         res.status(404).send("User not found");
       } else {
-        res.status(204).send();
+        console.log("co result:", result);
+        res.status(204).json({ success: true });
+        return;
       }
     } catch (error) {
       console.error(error);

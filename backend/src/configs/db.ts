@@ -4,15 +4,15 @@ class Database {
   private readonly DB_URI: string;
 
   constructor() {
-    this.DB_URI = "mongodb://localhost:27017/banOto360";
+    this.DB_URI = "mongodb://localhost:27017";
   }
 
   public async connect(): Promise<void> {
     try {
       await mongoose.connect(this.DB_URI);
-      console.log("✅MongoDB connected successfully!");
+      // console.log("✅ MongoDB connected successfully!");
     } catch (error) {
-      console.error("❌MongoDB connection error:", error);
+      console.error("❌ MongoDB connection error:", error);
     }
   }
 }
