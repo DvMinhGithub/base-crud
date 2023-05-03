@@ -1,34 +1,35 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { notification } from "antd";
 import api from "../../utils/api";
 
 export interface User {
   _id: string;
   name: string;
-  email: string;
-  phone: string;
+  price: number;
+  description: string;
 }
 
 export interface UsersState {
   users: User[];
-  status: "idle" | "loading" | "succeeded" | "failed";
-  error: string | null;
+  loading: boolean;
+  message: string | null;
 }
 
 const initialState: UsersState = {
   users: [],
-  status: "idle",
-  error: null,
+  loading: false,
+  message: null,
 };
 
 export const fetchUsers = createAsyncThunk("users/fetchUsers", async () => {
-  const response = await api.get("/users");
+  const response = await api.get("/products");
   return response.data;
 });
 
 export const addNewUser = createAsyncThunk(
   "users/addNewUser",
   async (user: User) => {
-    const response = await api.post("/users", user);
+    const response = await api.post("/products", user);
     return response.data;
   }
 );
@@ -36,7 +37,7 @@ export const addNewUser = createAsyncThunk(
 export const updateUserById = createAsyncThunk(
   "users/updateUserById",
   async (user: User) => {
-    const response = await api.put(`/users/${user._id}`, user);
+    const response = await api.put(`/products/${user._id}`, user);
     return response.data;
   }
 );
@@ -44,7 +45,7 @@ export const updateUserById = createAsyncThunk(
 export const deleteUserById = createAsyncThunk(
   "users/deleteUserById",
   async (id: string) => {
-    await api.delete(`/users/${id}`);
+    await api.delete(`/products/${id}`);
     return id;
   }
 );
@@ -56,27 +57,27 @@ const usersSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchUsers.pending, (state) => {
-        state.status = "loading";
+        state.loading = true;
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.loading = false;
         state.users = action.payload;
       })
       .addCase(fetchUsers.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.error.message ?? "Failed to fetch users";
+        state.loading = false;
+        state.message = action.error.message ?? "Failed to fetch users";
+        notification.error({
+          message: action.error.message ?? "Failed to fetch users",
+        });
       })
       .addCase(addNewUser.fulfilled, (state, action) => {
         state.users.push(action.payload.data);
       })
       .addCase(updateUserById.fulfilled, (state, action) => {
         const { _id, name, email, phone } = action.payload.data;
-        const existingUser = state.users.find((user) => user._id === _id);
-        if (existingUser) {
-          existingUser.name = name;
-          existingUser.email = email;
-          existingUser.phone = phone;
-        }
+       const userIndex = state.users.findIndex((user) => user._id === _id);
+       state.users[userIndex] = action.payload.data
+
       })
       .addCase(deleteUserById.fulfilled, (state, action) => {
         const id = action.payload;
@@ -85,13 +86,6 @@ const usersSlice = createSlice({
   },
 });
 
-export const selectAllUsers = (state: { users: UsersState }) =>
-  state.users.users;
-export const selectUserById = (state: { users: UsersState }, userId: string) =>
-  state.users.users.find((user) => user._id === userId);
-export const selectUserStatus = (state: { users: UsersState }) =>
-  state.users.status;
-export const selectUserError = (state: { users: UsersState }) =>
-  state.users.error;
+export const selectUsers = (state: { users: UsersState }) => state.users;
 
 export default usersSlice.reducer;

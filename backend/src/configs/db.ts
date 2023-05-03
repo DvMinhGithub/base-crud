@@ -1,19 +1,11 @@
+import { config } from "../configs";
 import mongoose from "mongoose";
 
-class Database {
-  private readonly DB_URI: string;
-
-  constructor() {
-    this.DB_URI = "mongodb://localhost:27017";
-  }
-
-  public async connect(): Promise<void> {
-    try {
-      await mongoose.connect(this.DB_URI);
-      // console.log("✅ MongoDB connected successfully!");
-    } catch (error) {
-      console.error("❌ MongoDB connection error:", error);
-    }
+export async function connectToDatabase(): Promise<void> {
+  try {
+    await mongoose.connect(config.uri);
+    console.log("✅ MongoDB connected successfully!");
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error);
   }
 }
-export default new Database();

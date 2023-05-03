@@ -1,10 +1,9 @@
-import AdminPage from "../features/home/Home";
-import UserPage from "../features/user/User";
+import LayoutPage from "../components/layouts";
+import LoginForm from "../features/auth/Login.page";
 
 const routes = [
-  { path: "/", element: <UserPage />, exact: true },
-  { path: "/login", element: null },
-  { path: "/test", element: <AdminPage /> },
+  { path: "/login", element: <LoginForm /> },
+  { path: "/", element: <LayoutPage /> },
 ];
 
 export default routes;

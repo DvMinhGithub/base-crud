@@ -1,4 +1,13 @@
-import { Button, Form, Input, Modal, Space, Table } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Space,
+  Spin,
+  Table,
+} from "antd";
 import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
@@ -6,13 +15,13 @@ import {
   addNewUser,
   deleteUserById,
   fetchUsers,
-  selectAllUsers,
+  selectUsers,
   updateUserById,
-} from "./userSlice";
+} from "./user.slice";
 
-const UserPage = () => {
+const UserPage: React.FC = () => {
   const dispatch = useAppDispatch();
-  const users = useAppSelector(selectAllUsers);
+  const { loading, users } = useAppSelector(selectUsers);
 
   const [openModal, settOpenModal] = React.useState(false);
   const [form] = Form.useForm();
@@ -38,7 +47,7 @@ const UserPage = () => {
   };
 
   useEffect(() => {
-    document.title = "User"
+    document.title = "User";
     dispatch(fetchUsers());
   }, [dispatch]);
 
@@ -55,32 +64,44 @@ const UserPage = () => {
   const handleDelete = (userId: string) => {
     dispatch(deleteUserById(userId));
   };
-
   const columns = [
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
+      width: "30%",
     },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
+      width: "40%",
     },
     {
       title: "Phone",
       dataIndex: "phone",
       key: "phone",
+      width: "20%",
     },
     {
       title: "Actions",
       key: "actions",
       render: (_text: string, record: User) => (
         <Space size="middle">
-          <Button onClick={() => handleEdit(record._id)}>Edit</Button>
-          <Button onClick={() => handleDelete(record._id)}>Delete</Button>
+          <a onClick={() => handleEdit(record._id)}>Edit</a>
+          <Popconfirm
+            placement="topLeft"
+            title={"Delete user"}
+            // description={description}
+            onConfirm={() => handleDelete(record._id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <a>Delete</a>
+          </Popconfirm>
         </Space>
       ),
+      width: "10%",
     },
   ];
 
@@ -89,17 +110,18 @@ const UserPage = () => {
       style={{
         justifyContent: "center",
         alignItems: "center",
-        maxWidth: "960px",
         margin: "0 auto",
       }}
     >
-      <Button
-        onClick={() => settOpenModal(true)}
-        type="primary"
-        style={{ marginBottom: 16 }}
-      >
-        Add New User
-      </Button>
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <Button
+          onClick={() => settOpenModal(true)}
+          type="primary"
+          style={{ marginBottom: 16 }}
+        >
+          Add New User
+        </Button>
+      </div>
       <Modal
         title={mode === "add" ? "Add New User" : "Edit User"}
         open={openModal}
@@ -109,17 +131,19 @@ const UserPage = () => {
         }}
         onOk={handleSubmit}
       >
-        <Form form={form} layout="vertical">
-          <Form.Item name="name" label="Name" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="email" label="Email" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="phone" label="Phone" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-        </Form>
+        <Spin spinning={loading}>
+          <Form form={form} layout="vertical">
+            <Form.Item name="name" label="Name" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+            <Form.Item name="email" label="Email" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+            <Form.Item name="phone" label="Phone" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+          </Form>
+        </Spin>
       </Modal>
       <Table columns={columns} dataSource={users} rowKey={"_id"} />
     </div>
